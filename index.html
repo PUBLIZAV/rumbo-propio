@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Rumbo Propio" />
+  <title>Rumbo Propio — Viaja a tu ritmo, protegido como con guía</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Sticky Header -->
+    <header class="top-header">
+      <div class="brand-row">
+        <div class="brand-logo">
+          <div class="brand-icon" aria-hidden="true">🧭</div>
+          <div>
+            <div class="brand-title">Rumbo Propio</div>
+            <div class="brand-subtitle" style="color: #34d399; font-weight: 800; letter-spacing: 0.03em;">✨ DE LA VISTA NACE EL VIAJE</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="btn-network-toggle" class="status-pill online" title="Simular modo con o sin internet">
+            <span id="network-dot">🟢</span>
+            <span id="network-label">Online</span>
+          </button>
+          <button id="btn-install-pwa" class="status-pill" title="Cómo instalar en tu celular">
+            📲 Instalar
+          </button>
+        </div>
+      </div>
+
+      <!-- Destination & Offline Pack Selector -->
+      <div class="dest-bar">
+        <select id="dest-select" class="dest-select" aria-label="Seleccionar destino">
+          <option value="cdmx">🇲🇽 Ciudad de México (CDMX)</option>
+          <option value="roma">🇮🇹 Roma, Italia</option>
+          <option value="medellin">🇨🇴 Medellín, Colombia</option>
+        </select>
+        <button id="btn-download-pack" class="btn-pack">
+          ⬇ Guardar Offline (<span id="pack-size-label">14.2 MB</span>)
+        </button>
+      </div>
+    </header>
+
+    <!-- 100% Visual Hero Banner: DE LA VISTA NACE EL VIAJE -->
+    <section id="hero-visual-banner" class="hero-visual-banner">
+      <div class="hero-visual-content">
+        <div>
+          <span class="slogan-pill">👁️ DE LA VISTA NACE EL VIAJE</span>
+          <div id="hero-dest-title" class="hero-dest-title">🇲🇽 Ciudad de México</div>
+          <div id="dest-tagline" style="font-size: 0.75rem; color: #e2e8f0; margin-top: 2px;"></div>
+        </div>
+        <button id="btn-listen-hero" class="btn btn-primary" style="padding: 8px 11px; font-size: 0.74rem; white-space: nowrap;">
+          🔊 Escuchar Guía
+        </button>
+      </div>
+    </section>
+
+    <!-- Visual Stories Strip (Zero-Reading Visual Highlights) -->
+    <section id="visual-stories-strip" class="visual-stories-strip" aria-label="Galería visual rápida"></section>
+
+    <!-- Active Geofence & Audible Alarm Banner -->
+    <section id="geofence-banner" class="geofence-banner" aria-live="polite">
+      <div class="geofence-text">
+        <h4 id="geofence-title">🟢 CAMINA LIBRE: Roma Norte</h4>
+        <p id="geofence-desc">🚶‍♂️ Peatonal · ☕ Cafés · 📵 Cel lejos del borde</p>
+      </div>
+      <button id="btn-test-sound" class="status-pill" title="Escuchar alerta de voz y sonido">
+        🔊 Voz
+      </button>
+    </section>
+
+    <!-- Main Views Container -->
+    <main class="view-container">
+      <!-- ==================== TAB 1: ESCUDO DE SEGURIDAD ==================== -->
+      <section id="view-shield" class="tab-view active">
+        <div class="subnav-chips" role="tablist">
+          <button class="chip-btn active" data-subview="sub-map">🗺️ Mapa y Zonas</button>
+          <button class="chip-btn" data-subview="sub-esim">📶 eSIM y Portales Baratos</button>
+          <button class="chip-btn" data-subview="sub-sos">🚨 SOS, Rastreo y Embajadas</button>
+          <button class="chip-btn" data-subview="sub-vault">🔐 Bóveda Pasaporte</button>
+          <button class="chip-btn" data-subview="sub-tips">👛 Tips Billetera y Calle</button>
+        </div>
+
+        <!-- SUBVIEW 1.1: MAPA + RADAR OFFLINE + ALERTA SONORA -->
+        <div id="sub-map" class="shield-subview">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🗺️ Mapa de Zonas y Desplazamiento</div>
+              <div class="map-mode-switch">
+                <button id="btn-mode-radar" class="map-mode-btn active">Radar Offline</button>
+                <button id="btn-mode-gmaps" class="map-mode-btn">Google Maps</button>
+              </div>
+            </div>
+            <div class="map-wrapper">
+              <canvas id="offline-radar-canvas" width="500" height="240"></canvas>
+              <iframe
+                id="google-map-frame"
+                title="Mapa de Google para desplazarse"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary);">
+                🔊 Toca para probar la alerta visual y sonora:
+              </span>
+              <button id="btn-real-gps" class="status-pill" style="font-size: 0.68rem; padding: 3px 8px;">
+                📍 Mi GPS
+              </button>
+            </div>
+
+            <div class="sim-controls">
+              <button class="btn btn-safe" id="sim-enter-safe">🟢 ZONA SÍ</button>
+              <button class="btn btn-caution" id="sim-enter-caution">🟡 CUIDADO</button>
+              <button class="btn btn-danger" id="sim-enter-danger">🔴 ZONA NO</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🚦 Semáforo de Barrios (Qué zonas sí y cuáles no)</div>
+            </div>
+            <div id="zones-list"></div>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 1.2: RASTREO EN TIEMPO REAL + SOS + EMERGENCIAS + EMBAJADAS -->
+        <div id="sub-sos" class="shield-subview" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📡 Contacto de Emergencia y Rastreo en Vivo</div>
+              <span id="tracking-badge" class="badge caution">Inactivo</span>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 10px;">
+              Tu contacto podrá ver tu desplazamiento en tiempo real cuando tengas datos, o recibir tus coordenadas GPS exactas por SMS/WhatsApp incluso con señal mínima.
+            </p>
+
+            <div class="row-2">
+              <div class="input-group">
+                <label for="emerg-contact-name">Nombre de tu contacto</label>
+                <input id="emerg-contact-name" class="input-field" type="text" placeholder="Ej. Mamá / Pareja" value="Contacto de Confianza" />
+              </div>
+              <div class="input-group">
+                <label for="emerg-contact-phone">WhatsApp / Teléfono (con +país)</label>
+                <input id="emerg-contact-phone" class="input-field" type="tel" placeholder="+525512345678" value="+525512345678" />
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+              <button id="btn-toggle-tracking" class="btn btn-primary" style="flex: 1;">
+                ▶️ Iniciar Rastreo en Tiempo Real
+              </button>
+              <button id="btn-share-live-link" class="btn btn-blue">
+                🔗 Copiar Link en Vivo
+              </button>
+            </div>
+
+            <div id="live-tracking-box" style="display: none; margin-top: 10px; padding: 10px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); font-size: 0.75rem;">
+              <div style="font-weight: 800; color: #34d399; margin-bottom: 4px;">● Transmitiendo desplazamiento GPS en vivo</div>
+              <div id="live-tracking-coords" style="color: var(--text-secondary);"></div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 14px 0;" />
+
+            <div style="font-size: 0.78rem; font-weight: 800; margin-bottom: 8px;">
+              🆘 Botón de Pánico Instantáneo (Envía Coordenadas + Mapa + Zona Actual):
+            </div>
+            <div class="row-2">
+              <button id="btn-sos-whatsapp" class="btn btn-sos">
+                💬 SOS por WhatsApp
+              </button>
+              <button id="btn-sos-sms" class="btn btn-danger">
+                ✉️ SOS por SMS (Sin Datos)
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🚓 Números de Emergencia Locales (Offline)</div>
+            </div>
+            <div id="emergencies-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏛️ Embajadas y Consulados (Con Ruta Google Maps)</div>
+            </div>
+            <div id="embassies-list"></div>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 1.3: BÓVEDA CON CLAVE PARA ESCANEAR PASAPORTE -->
+        <div id="sub-vault" class="shield-subview" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🔐 Bóveda Digital de Pasaporte con Clave</div>
+              <span id="vault-status-badge" class="badge danger">Bloqueada</span>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 10px;">
+              Deja tu pasaporte físico bajo llave en el hotel. Escanea tu pasaporte y póliza aquí; quedan cifrados en tu teléfono y protegidos con tu PIN de 4 dígitos, accesibles 100% sin internet.
+            </p>
+
+            <!-- Locked Screen -->
+            <div id="vault-locked-panel" style="text-align: center; padding: 12px 0;">
+              <div style="font-size: 2.2rem; margin-bottom: 6px;">🔒</div>
+              <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">Ingresa tu PIN de seguridad</div>
+              <div style="font-size: 0.73rem; color: var(--text-secondary); margin-bottom: 8px;">
+                (PIN por defecto para probar el demo: <strong>1234</strong>)
+              </div>
+              <div class="pin-pad">
+                <input id="vault-pin-input" class="input-field pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" />
+              </div>
+              <button id="btn-unlock-vault" class="btn btn-primary" style="width: 100%; max-width: 240px;">
+                🔓 Desbloquear Bóveda
+              </button>
+              <p id="vault-error-msg" style="color: #fb7185; font-size: 0.75rem; margin-top: 8px; display: none;">
+                PIN incorrecto. Intenta con 1234 o tu PIN configurado.
+              </p>
+            </div>
+
+            <!-- Unlocked Screen -->
+            <div id="vault-unlocked-panel" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">✅ Bóveda desbloqueada en este dispositivo</span>
+                <button id="btn-lock-vault" class="status-pill">🔒 Bloquear</button>
+              </div>
+
+              <div class="row-2">
+                <div class="input-group">
+                  <label for="passport-number">Nº de Pasaporte</label>
+                  <input id="passport-number" class="input-field" type="text" placeholder="Ej. G38492019" />
+                </div>
+                <div class="input-group">
+                  <label for="passport-expiry">Vencimiento y Tipo Sangre</label>
+                  <input id="passport-expiry" class="input-field" type="text" placeholder="Ej. 10/2031 · O+" />
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="insurance-info">Seguro de Viaje / Póliza de Emergencia</label>
+                <input id="insurance-info" class="input-field" type="text" placeholder="Ej. Assist Card #AC-99281 · Tel: +1 800 555 0199" />
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                <label class="btn btn-primary" style="flex: 1; cursor: pointer;">
+                  📸 Escanear Pasaporte con Cámara
+                  <input id="passport-camera-input" type="file" accept="image/*" capture="environment" style="display: none;" />
+                </label>
+                <button id="btn-load-demo-passport" class="btn btn-blue">
+                  🪪 Cargar Pasaporte Demo
+                </button>
+              </div>
+
+              <div class="passport-card" id="passport-preview-container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.76rem; font-weight: 800; color: #38bdf8;">COPIA DIGITAL CERTIFICADA OFFLINE</span>
+                  <span style="font-size: 0.68rem; color: var(--text-secondary);">Cifrado Local AES</span>
+                </div>
+                <div id="passport-visual-holder" style="margin-top: 8px; font-size: 0.78rem; color: var(--text-secondary);">
+                  Aún no has escaneado una imagen. Usa la cámara de tu celular o toca "Cargar Pasaporte Demo".
+                </div>
+              </div>
+
+              <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <button id="btn-save-vault" class="btn btn-safe" style="flex: 1;">💾 Guardar en el Celular (Offline)</button>
+                <button id="btn-change-pin" class="btn btn-caution">🔑 Cambiar PIN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 1.4: TIPS DE SEGURIDAD (BILLETERA, TRANSPORTE, ESTAFAS) -->
+        <div id="sub-tips" class="shield-subview" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">👛 Tips de Seguridad del Guía Local</div>
+            </div>
+            <div id="safety-tips-list"></div>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 1.5: eSIM Y PORTALES BARATOS Y CONFIABLES (VIAJERO INTERNACIONAL) -->
+        <div id="sub-esim" class="shield-subview" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📶 eSIM Internacionales (Realmente Baratas)</div>
+              <span class="badge safe">Ahorra hasta 70%</span>
+            </div>
+            <div id="esim-global-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📱 Chip Físico Local vs. Trampa de Aeropuerto</div>
+            </div>
+            <div id="esim-local-comparison"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🎟️ Portales Oficiales y Baratos (Cero Revendedores)</div>
+              <span class="badge caution">Precio Real</span>
+            </div>
+            <div id="cheap-portals-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: ITINERARIO A TU RITMO ==================== -->
+      <section id="view-itinerary" class="tab-view">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🗓️ Tu Ruta a Tu Ritmo (Sin que un tour te apure)</div>
+            <span class="badge safe">Offline + Google Maps</span>
+          </div>
+          <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Cada parada incluye el nivel de seguridad del barrio, el consejo del guía local y el botón directo para desplazarte con Google Maps.
+          </p>
+          <div id="itinerary-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">➕ Agregar parada a tu itinerario</div>
+          </div>
+          <div class="row-2">
+            <div class="input-group">
+              <label for="new-it-day">Día y Hora</label>
+              <input id="new-it-day" class="input-field" type="text" placeholder="Ej. Día 2 · 16:00" />
+            </div>
+            <div class="input-group">
+              <label for="new-it-safety">Nivel de Zona</label>
+              <select id="new-it-safety" class="input-field">
+                <option value="safe">🟢 Zona Segura</option>
+                <option value="caution">🟡 Zona con Precaución</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="new-it-title">Lugar o Actividad</label>
+            <input id="new-it-title" class="input-field" type="text" placeholder="Ej. Cena en terraza / Mirador local" />
+          </div>
+          <div class="input-group">
+            <label for="new-it-tip">Nota personal o recomendación</label>
+            <input id="new-it-tip" class="input-field" type="text" placeholder="Ej. Llevar efectivo solo para propina" />
+          </div>
+          <button id="btn-add-itinerary" class="btn btn-primary" style="width: 100%;">
+            ➕ Guardar en mi Itinerario Offline
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: DIVISAS Y GASTOS COMPARTIDOS ==================== -->
+      <section id="view-expenses" class="tab-view">
+        <!-- SISTEMA DE CAMBIO DE DIVISAS OFFLINE & DETECTOR ANTI-ESTAFA -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💱 Sistema de Cambio de Divisas (Offline)</div>
+            <span class="badge safe" id="fx-rate-badge">Tasa Oficial Guardada</span>
+          </div>
+          <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Convierte precios al instante sin internet, consulta la tabla rápida de billetes para pagar en la calle y verifica si una casa de cambio o cajero te está cobrando comisión oculta.
+          </p>
+
+          <!-- Conversor Bidireccional -->
+          <div class="row-2" style="align-items: end;">
+            <div class="input-group" style="margin-bottom: 6px;">
+              <label for="fx-amount-local">Monto en <span id="fx-dest-code-label">MXN</span> (Destino)</label>
+              <input id="fx-amount-local" class="input-field" type="number" step="any" value="100" />
+            </div>
+            <div class="input-group" style="margin-bottom: 6px;">
+              <label for="fx-home-currency">Tu Moneda Base</label>
+              <select id="fx-home-currency" class="input-field">
+                <option value="USD">🇺🇸 USD — Dólar</option>
+                <option value="EUR">🇪🇺 EUR — Euro</option>
+                <option value="MXN">🇲🇽 MXN — Peso Mex</option>
+                <option value="COP">🇨🇴 COP — Peso Col</option>
+                <option value="ARS">🇦🇷 ARS — Peso Arg</option>
+                <option value="CLP">🇨🇱 CLP — Peso Chi</option>
+                <option value="PEN">🇵🇪 PEN — Sol Perú</option>
+                <option value="BRL">🇧🇷 BRL — Real Bras</option>
+                <option value="GBP">🇬🇧 GBP — Libra</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-2" style="align-items: center; margin-bottom: 10px;">
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="fx-amount-home">Equivalente en tu moneda</label>
+              <input id="fx-amount-home" class="input-field" type="number" step="any" />
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="fx-custom-rate">Tasa (<span id="fx-rate-pair-label">MXN por 1 USD</span>)</label>
+              <input id="fx-custom-rate" class="input-field" type="number" step="any" title="Puedes ajustar esta tasa manualmente si cambiaste a un precio distinto" />
+            </div>
+          </div>
+
+          <!-- Tabla Rápida de Bolsillo (Cheat Sheet) -->
+          <div style="margin-top: 10px;">
+            <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 6px;">
+              ⚡ Tabla Rápida de Bolsillo (Para pagar en la calle sin sacar calculadora):
+            </div>
+            <div id="fx-quick-pills" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center;"></div>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 14px 0;" />
+
+          <!-- Detector de Trampa o Cambio Justo en Casas de Cambio / ATM -->
+          <div style="font-size: 0.82rem; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span>🕵️ Detector Anti-Estafa en Casa de Cambio / ATM</span>
+            <span id="fx-spread-badge" class="badge safe">Listo para evaluar</span>
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Escribe la tasa que te ofrecen en la ventanilla o el cajero para saber cuánta comisión oculta estás perdiendo:
+          </p>
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <input id="fx-offered-rate" class="input-field" type="number" step="any" placeholder="Ej. Tasa ofrecida en ventanilla" style="flex: 1;" />
+            <button id="btn-check-fx-scam" class="btn btn-blue">Evaluar Cambio</button>
+          </div>
+          <div id="fx-scam-result" style="display: none; padding: 9px 11px; border-radius: 9px; font-size: 0.76rem; margin-bottom: 10px;"></div>
+
+          <!-- Guía Local de Cajeros y Casas de Cambio del Destino -->
+          <div id="fx-local-guide"></div>
+        </div>
+
+        <!-- CONTROL DE GASTOS COMPARTIDOS (MULTI-DIVISA) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💸 Control de Gastos Compartidos</div>
+            <span id="expense-currency-badge" class="badge safe">MXN</span>
+          </div>
+
+          <div class="balance-box">
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-secondary); flex-wrap: wrap; gap: 4px;">
+              <span>Total del viaje: <strong id="exp-total-amount" style="color: var(--text-primary);">$0</strong></span>
+              <span>En tu moneda: <strong id="exp-total-home" style="color: #38bdf8;">$0</strong></span>
+              <span>Por persona (50/50): <strong id="exp-per-person" style="color: var(--text-primary);">$0</strong></span>
+            </div>
+            <div id="exp-settlement-text" style="margin-top: 8px; font-size: 0.9rem; font-weight: 800; color: #34d399;">
+              Cuentas claras
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="input-group">
+              <label for="exp-desc">Concepto</label>
+              <input id="exp-desc" class="input-field" type="text" placeholder="Ej. Comida, Uber, Museo" />
+            </div>
+            <div class="input-group">
+              <label for="exp-amount">Monto y Moneda</label>
+              <div style="display: flex; gap: 6px;">
+                <input id="exp-amount" class="input-field" type="number" placeholder="350" style="flex: 1; min-width: 0;" />
+                <select id="exp-input-currency" class="input-field" style="width: 82px; padding: 8px 6px;">
+                  <option value="LOCAL">Local</option>
+                  <option value="HOME">Mi divisa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="input-group">
+              <label for="exp-payer">¿Quién pagó?</label>
+              <select id="exp-payer" class="input-field">
+                <option value="Yo">Yo pagué</option>
+                <option value="Acompañante">Pagó mi Acompañante</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="exp-cat">Categoría</label>
+              <select id="exp-cat" class="input-field">
+                <option value="Comida">🍽️ Comida</option>
+                <option value="Transporte">🚕 Transporte</option>
+                <option value="Entradas">🎟️ Entradas</option>
+                <option value="Otros">🛍️ Otros</option>
+              </select>
+            </div>
+          </div>
+          <button id="btn-add-expense" class="btn btn-primary" style="width: 100%; margin-bottom: 14px;">
+            ➕ Registrar Gasto Offline
+          </button>
+
+          <div id="expenses-list"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: CONTENIDO PARA REDES ==================== -->
+      <section id="view-creator" class="tab-view">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📸 Spots y Guiones para tus Redes</div>
+            <span class="badge safe">Creator Kit</span>
+          </div>
+          <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Ideas listas para grabar en cada punto de tu viaje, con el mejor horario de luz y qué precauciones tomar al sacar la cámara.
+          </p>
+          <div id="creator-spots-list"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: VALIDACIÓN (MOM TEST) ==================== -->
+      <section id="view-validate" class="tab-view">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎯 Modo Validación en Vivo (Sin sesgo)</div>
+            <span class="badge caution">Pago Único · Sin Agencia</span>
+          </div>
+          <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Usa esta pestaña cuando le muestres el prototipo en tu celular a un viajero. Responde aquí sus 3 preguntas clave y guárdalas o envíalas a tu WhatsApp:
+          </p>
+
+          <div class="input-group">
+            <label for="val-q1">1. ¿Cuánto pagarías por esto para tu próximo viaje? (Pago único por viaje)</label>
+            <select id="val-q1" class="input-field">
+              <option value="$9 - $15 USD por viaje">$9 – $15 USD por viaje</option>
+              <option value="$19 - $29 USD por viaje">$19 – $29 USD por viaje</option>
+              <option value="$35+ USD (Vale lo de un tour de 1 hora)">$35+ USD (Vale más que un tour)</option>
+              <option value="Solo lo usaría si fuera gratis">Solo lo usaría si fuera gratis</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="val-q2">2. ¿Lo usarías tú o se lo das a alguien que ya va contigo (pareja, amigo)?</label>
+            <select id="val-q2" class="input-field">
+              <option value="Lo llevaría yo en mi celular">Lo llevaría yo en mi celular</option>
+              <option value="Ambos (por el rastreo y gastos compartidos)">Ambos (por el rastreo y gastos compartidos)</option>
+              <option value="Se lo daría a mi pareja/amigo que organiza">Se lo daría a mi pareja/amigo que organiza</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="val-q3">3. De todo (itinerario, gastos/divisas, contenido, zonas/seguridad/pasaporte), ¿qué te resuelve algo de verdad y qué te da igual?</label>
+            <textarea id="val-q3" class="input-field" rows="3" placeholder="Ej. Me resuelve muchísimo la alerta sonora de zonas inseguras, el cambio de divisas y la bóveda del pasaporte..."></textarea>
+          </div>
+
+          <div class="row-2" style="margin-top: 10px;">
+            <button id="btn-save-validation" class="btn btn-primary">💾 Guardar Entrevista</button>
+            <button id="btn-whatsapp-validation" class="btn btn-blue">📲 Enviar a mi WhatsApp</button>
+          </div>
+
+          <div id="validations-saved-list" style="margin-top: 14px;"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Sticky Tab Bar -->
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <button class="nav-item active" data-tab="view-shield">
+        <span class="nav-icon">🛡️</span>
+        <span>Seguridad</span>
+      </button>
+      <button class="nav-item" data-tab="view-itinerary">
+        <span class="nav-icon">🗺️</span>
+        <span>Itinerario</span>
+      </button>
+      <button class="nav-item" data-tab="view-expenses">
+        <span class="nav-icon">💱</span>
+        <span>Divisas/Gastos</span>
+      </button>
+      <button class="nav-item" data-tab="view-creator">
+        <span class="nav-icon">📸</span>
+        <span>Contenido</span>
+      </button>
+      <button class="nav-item" data-tab="view-validate">
+        <span class="nav-icon">🎯</span>
+        <span>Validar</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
